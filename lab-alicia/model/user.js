@@ -41,16 +41,16 @@ userSchema.pre('save', function(next) {
   }
 });
 
-// userSchema.checkPassword = (attempt) => {
-//   let user = this;
-//   return new Promise((resolve, reject) => {
-//     bcrypt.compare(attempt, user.password, (err, valid) => {
-//       if (err) {
-//         reject(err);
-//       }
-//       resolve(valid);
-//     });
-//   });
-// };
+userSchema.checkPassword = function(attempt) {
+  let user = this;
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(attempt, user.password, (err, valid) => {
+      if (err) {
+        reject(err);
+      }
+      resolve(valid);
+    });
+  });
+};
 
 module.exports = User;

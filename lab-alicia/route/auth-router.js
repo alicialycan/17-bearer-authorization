@@ -1,7 +1,6 @@
 'use strict';
 const express = require('express');
 const bcrypt = require('bcrypt');
-const mongoose = require('mongoose');
 const User = require('../model/user.js');
 const router = express.Router();
 
