@@ -1,13 +1,9 @@
 'use strict';
 
-// const crypto = require('crypto');
-const bcrypt = require('bcrypt');
-// const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
-// const createError = require('http-errors');
-// const Promise = require('bluebird');
+const bcrypt = require('bcrypt');
 
-// mongoose.connect(process.env.MONGODB_URI);
+mongoose.connect('mongodb://localhost/user');
 
 const Schema = mongoose.Schema;
 
@@ -30,7 +26,7 @@ const userSchema = Schema({
 
 const User = mongoose.model('User', userSchema);
 
-userSchema.pre('save', next => {
+userSchema.pre('save', function(next) {
   let user = this;
   if (user.isNew) {
     bcrypt.hash(user.password, 10, (err, hash) => {
