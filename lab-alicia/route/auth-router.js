@@ -1,5 +1,7 @@
 'use strict';
 const express = require('express');
+const bcrypt = require('bcrypt');
+const mongoose = require('mongoose');
 const User = require('../model/user.js');
 const router = express.Router();
 
@@ -12,7 +14,6 @@ router.route('/signup')
   })
 
   .post((req, res) => {
-    console.log('req and body', req.body);
     new User(req.body)
       .save()
       .then(users => {
@@ -22,34 +23,41 @@ router.route('/signup')
       .catch(err => res.send(err.message));
   });
 
-// router.route('/signin')
+router.route('/signin')
 
-// .get((req, res) => {
-//     let authHeader = req.get('Authorization');
-//     console.log('Auth header:', authHeader);
-//     if (!authHeader) {
-//         res.status(401);
-//         res.send('Please provide a username and password');
-//     }
+  .get((req, res) => {
+    let authHeader = req.get('Authorization');
+    console.log('Auth header:', authHeader);
+    if (!authHeader) {
+      res.status(400);
+      res.send('Please provide a username and password');
+      return;
+    }
+    let payload = authHeader.split('Basic')[1];
+    let decoded = Buffer.from(payload, 'base64').toString();
+    let [username, password] = decoded.split(':');
+    let hash;
 
-//     let payload = authHeader.split('Basic')[1];
-//     let decoded = Buffer.from(payload, 'base64').toString();
-//     let [username, password] = decoded.split(':');
-
-//     User.findOne({ username: username })
-//         .then(user => {
-//             console.log(user);
-//             if (user === null) {
-//                 res.send('User not found');
-//             }
-//             if (user.password === password) {
-//                 res.send('You are now logged in');
-//             } else {
-//                 res.sendStatus(401).send('Invalid password');
-//             }
-//         })
-//         .catch(err => res.sendStatus(400).send(err));
-//         console.log('username and password info:', username, password);
-// });
+    User.findOne({ username: username })
+      .then(user => {
+        console.log(user);
+        hash = user.password;
+        let valid = bcrypt.compareSync(password, hash);
+        if (valid) {
+          res.send('Authorized');
+        } else {
+          res.status(401).send('Unauthorized');
+        // if (user === null) {
+        //   res.send('User not found');
+        // }
+        // if (hash === password) {
+        //   res.send('You are now logged in');
+        // } else {
+        //   res.status(401).send('Unauthorized');
+        }
+      })
+      .catch(err => res.send(err.message));
+    console.log('username and password info:', username, password);
+  });
 
 module.exports = router;

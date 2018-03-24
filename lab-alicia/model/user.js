@@ -7,7 +7,7 @@ const mongoose = require('mongoose');
 // const createError = require('http-errors');
 // const Promise = require('bluebird');
 
-mongoose.connect(process.env.MONGODB_URI);
+// mongoose.connect(process.env.MONGODB_URI);
 
 const Schema = mongoose.Schema;
 
@@ -30,27 +30,31 @@ const userSchema = Schema({
 
 const User = mongoose.model('User', userSchema);
 
-// userSchema.pre('save', next => {
-//   if (this.isNew) {
-//     bcrypt.hash(this.password, 10, (err, hash) => {
-//       if (err) return next(err);
-
-//       this.password = hash;
-//       this.passwordHash = hash;
-//       next();
-//     });
-//   }
-// });
+userSchema.pre('save', next => {
+  let user = this;
+  if (user.isNew) {
+    bcrypt.hash(user.password, 10, (err, hash) => {
+      if (err) return next(err);
+      user.password = hash;
+      user.passwordHash = hash;
+      next();
+    });
+  } else {
+    console.log('user is not new');
+    next();
+  }
+});
 
 // userSchema.checkPassword = (attempt) => {
-//     return new Promise((resolve, reject) => {
-//         bcrypt.compare(attempt, this.password, (err, valid) => {
-//             if (err) {
-//                 reject(err)
-//             }
-//             resolve(valid)
-//         })
-//     })
+//   let user = this;
+//   return new Promise((resolve, reject) => {
+//     bcrypt.compare(attempt, user.password, (err, valid) => {
+//       if (err) {
+//         reject(err);
+//       }
+//       resolve(valid);
+//     });
+//   });
 // };
 
 module.exports = User;
