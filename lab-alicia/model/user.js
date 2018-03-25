@@ -2,8 +2,9 @@
 
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-mongoose.connect('mongodb://localhost/user');
+mongoose.connect(process.env.MONGODB_URI);
 
 const Schema = mongoose.Schema;
 
@@ -41,16 +42,21 @@ userSchema.pre('save', function(next) {
   }
 });
 
-userSchema.checkPassword = function(attempt) {
-  let user = this;
-  return new Promise((resolve, reject) => {
-    bcrypt.compare(attempt, user.password, (err, valid) => {
-      if (err) {
-        reject(err);
-      }
-      resolve(valid);
-    });
-  });
-};
+// userSchema.methods.checkPassword = function(password) {
+//   let user = this;
+//   return new Promise((resolve, reject) => {
+//     bcrypt.compare(password, user.password, (err, valid) => {
+//       if (err) {
+//         reject(err);
+//       }
+//       if (!valid) {
+//         reject(err);
+//       }
+//       let payload = { userId: user.id };
+//       let token = jwt.sign(payload, process.env.SECRET);
+//       resolve(token);
+//     });
+//   });
+// };
 
 module.exports = User;
