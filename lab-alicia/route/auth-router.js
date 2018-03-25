@@ -3,7 +3,6 @@ const express = require('express');
 const bcrypt = require('bcrypt');
 const User = require('../model/user.js');
 const jwt = require('jsonwebtoken');
-const bearerAuth = require('../lib/bearer-auth-middleware.js');
 const authRouter = express.Router();
 
 authRouter.route('/signup')
@@ -38,23 +37,36 @@ authRouter.route('/signin')
     let decoded = Buffer.from(payload, 'base64').toString();
     let [username, password] = decoded.split(':');
     console.log('username and password info:', username, password);
-    // let hash;
 
     User.findOne({
       username: username
     })
       .then(user => {
-        bcrypt.compare(password, user.password, (err, valid) => {
-          if (err) {
+        if (user === null) {
+          res.send('user not found');
+        };
+        user.checkPassword(password)
+          .then(isValid => {
+            let payload = { userId: user._id };
+            let token = jwt.sign(payload, process.env.SECRET);
+            res.send(token);
+          })
+          .catch(err => {
             res.send(err);
-          }
-          if (!valid) {
-            res.status(401).send('invalid password');
-          }
-          let payload = { userId: user.id };
-          let token = jwt.sign(payload, process.env.SECRET);
-          res.send(token);        
-        });
+          });
+        // bcrypt.compare(password, user.password, (err, valid) => {
+        //   if (err) {
+        //     res.send(err);
+        //   }
+        //   if (!valid) {
+        //     res.status(401).send('invalid password');
+        //     return;
+        //   }
+        //   let payload = { userId: user._id };
+        //   let token = jwt.sign(payload, process.env.SECRET);
+        //   console.log('token', token);
+        //   res.send(token);        
+        // });
       });
   });
 

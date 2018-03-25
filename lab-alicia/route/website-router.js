@@ -6,15 +6,17 @@ const bearerAuth = require('../lib/bearer-auth-middleware.js');
 
 const websiteRouter = express.Router();
 
-websiteRouter.route('/websites', bearerAuth)
+websiteRouter.route('/websites')
 
-  .get((req, res) => {
-    Website.find()
-      .then(user => res.status(200).json(user))
+  .get(bearerAuth, (req, res) => {
+    console.log('UserId:', req.user);
+    Website.find({userId: req.user})
+      .then(websites => res.status(200).json(websites))
       .catch(err => res.sendStatus(404).send(err));
   })
 
-  .post((req, res) => {
+  .post(bearerAuth, (req, res) => {
+    req.body.userId = req.user._id;
     new Website(req.body)
       .save()
       .then(website => {
@@ -24,9 +26,9 @@ websiteRouter.route('/websites', bearerAuth)
       .catch(err => res.status(404).send(err.message));
   });
 
-websiteRouter.route('/website/:id', bearerAuth)
+websiteRouter.route('/website/:id')
 
-  .get((req, res) => {
+  .get(bearerAuth, (req, res) => {
     if (req.params.id) {
       return Website.findById(req.params.id)
         .then((website) => res.status(200).json(website))
@@ -34,7 +36,7 @@ websiteRouter.route('/website/:id', bearerAuth)
     }
   })
 
-  .put((req, res) => {
+  .put(bearerAuth, (req, res) => {
     let id = req.params.id;
     Website.findByIdAndUpdate(id, req.body, {
       new: true
@@ -43,7 +45,7 @@ websiteRouter.route('/website/:id', bearerAuth)
       .catch(err => res.status(400).send(err.message));
   })
 
-  .delete((req, res) => {
+  .delete(bearerAuth, (req, res) => {
     Website.findByIdAndRemove(req.params.id)
       .then(website => {
         if (website.userId.toString() === req.user.id.toString()) {

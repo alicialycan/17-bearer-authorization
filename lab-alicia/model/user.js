@@ -42,21 +42,21 @@ userSchema.pre('save', function(next) {
   }
 });
 
-// userSchema.methods.checkPassword = function(password) {
-//   let user = this;
-//   return new Promise((resolve, reject) => {
-//     bcrypt.compare(password, user.password, (err, valid) => {
-//       if (err) {
-//         reject(err);
-//       }
-//       if (!valid) {
-//         reject(err);
-//       }
-//       let payload = { userId: user.id };
-//       let token = jwt.sign(payload, process.env.SECRET);
-//       resolve(token);
-//     });
-//   });
-// };
+userSchema.methods.checkPassword = function(password) {
+  let user = this;
+  return new Promise((resolve, reject) => {
+    bcrypt.compare(password, user.password, (err, valid) => {
+      if (err) {
+        reject(err);
+      }
+      if (!valid) {
+        reject(err);
+      }
+      let payload = { userId: user.id };
+      let token = jwt.sign(payload, process.env.SECRET);
+      resolve(token);
+    });
+  });
+};
 
 module.exports = User;

@@ -2,9 +2,12 @@
 require('dotenv').config();
 
 const express = require('express');
+const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const authRouter = require('./route/auth-router.js');
 const websiteRouter = require('./route/website-router.js');
+
+mongoose.connect(process.env.MONGODB_URI);
 
 const app = express();
 
